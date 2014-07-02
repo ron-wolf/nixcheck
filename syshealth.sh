@@ -12,10 +12,10 @@ PORT=0;
 
 # check to see if the number of arguments is valid
 if [ "$#" -lt 1 ]; then
-	echo "Not enough arguements.";
+	echo "Not enough arguments.";
 	exit 1;
 elif [ "$#" -gt 4 ]; then
-	echo "Too many arguements.";
+	echo "Too many arguments.";
 	exit 1;
 fi
 
