@@ -19,9 +19,11 @@ elif [ "$#" -gt 4 ]; then
 	exit 1;
 fi
 
+# parse command line arguments
 for (( i=1; i <= $# ; ++i )); do
 	case "${!i}" in
 	"-p")
+		# the argument immediately following the -p flag must be a port number
 		next=`expr $i + 1`;
 		if ! [[ ${!next} =~ ^[0-9]+$ ]] || [ "$i" -eq "$#" ]; then
 			echo "You must specify a port number after -p";
@@ -40,7 +42,7 @@ for (( i=1; i <= $# ; ++i )); do
 		CHECK_DISK_USAGE=$TRUE;
 		;;
 	"-n")
-		CHECK_NICK=$TRUE;
+		CHECK_NIC=$TRUE;
 		;;
 	*)
 		echo "Invalid option: ${!i}";
@@ -50,6 +52,7 @@ for (( i=1; i <= $# ; ++i )); do
 	esac
 done
 
+# output state information
 [[ $CHECK_NIC = $TRUE ]] && status_message="ON" ||  status_message="OFF";
 echo "check_nic_health => $status_message";
 [[ $CHECK_DISK_USAGE = $TRUE ]] && status_message="ON" || status_message="OFF";
