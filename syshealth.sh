@@ -60,3 +60,35 @@ echo "check_disk_usage => $status_message";
 [[ $CHECK_PORT_LISTEN = $TRUE ]] && status_message="ON" || status_message="OFF";
 echo "check_port_listen => $status_message";
 
+# CHECK IF SPECIED PORT IS LISTENING
+
+# query netstat for the specified port
+result=`netstat -plnt | grep "0:$PORT "`;
+
+# check if port is listening
+if [ -n "$result" ]; then
+	echo "Port is indeed listening.";
+else
+	echo "Port is not listening.";
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
