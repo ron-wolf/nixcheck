@@ -1,13 +1,9 @@
 #!/bin/bash
 
-# define true and false
-TRUE=1
-FALSE=2
-
 # state flags
-CHECK_NIC=$FALSE
-CHECK_DISK_USAGE=$FALSE
-CHECK_PORT_LISTEN=$FALSE
+CHECK_NIC=false
+CHECK_DISK_USAGE=false
+CHECK_PORT_LISTEN=false
 PORT=0;
 
 # check to see if the number of arguments is valid
@@ -29,20 +25,20 @@ for (( i=1; i <= $# ; ++i )); do
 			echo "You must specify a port number after -p";
 			echo "Exiting.";
 			exit 1;
-		elif [ $CHECK_PORT_LISTEN = $TRUE ]; then
+		elif [ $CHECK_PORT_LISTEN = true ]; then
 			echo "Can't specify options twice.";
 			echo "Exiting.";
 			exit 1;
 		fi
-		CHECK_PORT_LISTEN=$TRUE;
+		CHECK_PORT_LISTEN=true;
 		PORT=${!next};
 		i=$next;
 		;;
 	"-d")
-		CHECK_DISK_USAGE=$TRUE;
+		CHECK_DISK_USAGE=true;
 		;;
 	"-n")
-		CHECK_NIC=$TRUE;
+		CHECK_NIC=true;
 		;;
 	*)
 		echo "Invalid option: ${!i}";
@@ -53,11 +49,11 @@ for (( i=1; i <= $# ; ++i )); do
 done
 
 # output state information
-[[ $CHECK_NIC = $TRUE ]] && status_message="ON" ||  status_message="OFF";
+[[ $CHECK_NIC = true ]] && status_message="ON" ||  status_message="OFF";
 echo "check_nic_health => $status_message";
-[[ $CHECK_DISK_USAGE = $TRUE ]] && status_message="ON" || status_message="OFF";
+[[ $CHECK_DISK_USAGE = true ]] && status_message="ON" || status_message="OFF";
 echo "check_disk_usage => $status_message";
-[[ $CHECK_PORT_LISTEN = $TRUE ]] && status_message="ON" || status_message="OFF";
+[[ $CHECK_PORT_LISTEN = true ]] && status_message="ON" || status_message="OFF";
 echo "check_port_listen => $status_message";
 
 # CHECK IF SPECIED PORT IS LISTENING
@@ -67,7 +63,8 @@ result=`netstat -plnt | grep "0:$PORT "`;
 
 # check if port is listening
 if [ -n "$result" ]; then
-	echo "Port is indeed listening.";
+	service=`echo "$result" | awk '{print $7}' | cut -d'/' -f2`;
+	echo "$service is LISTENING on port $PORT";
 else
 	echo "Port is not listening.";
 fi
