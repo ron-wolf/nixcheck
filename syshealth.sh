@@ -56,36 +56,18 @@ echo "check_disk_usage => $status_message";
 [[ $CHECK_PORT_LISTEN = true ]] && status_message="ON" || status_message="OFF";
 echo "check_port_listen => $status_message";
 
-# CHECK IF SPECIED PORT IS LISTENING
+if [ $CHECK_PORT_LISTEN = true ]; then
 
-# query netstat for the specified port
-result=`netstat -plnt | grep "0:$PORT "`;
-
-# check if port is listening
-if [ -n "$result" ]; then
-	service=`echo "$result" | awk '{print $7}' | cut -d'/' -f2`;
-	echo "$service is LISTENING on port $PORT";
-else
-	echo "Port is not listening.";
+	# CHECK IF SPECIED PORT IS LISTENING
+	
+	# query netstat for the specified port
+	result=`netstat -plnt | grep "0:$PORT "`;
+	
+	# check if port is listening
+	if [ -n "$result" ]; then
+		service=`echo "$result" | awk '{print $7}' | cut -d'/' -f2`;
+		echo "$service is LISTENING on port $PORT";
+	else
+		echo "Port is not listening.";
+	fi
 fi
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
