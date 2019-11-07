@@ -4,8 +4,8 @@
 CHECK_NIC=false
 CHECK_DISK_USAGE=false
 CHECK_LSERVICES=false
-CHECK_NETOWRK=false
-DEVICE=0;
+CHECK_NETWORK=false
+# DEVICE=0
 
 function duplicate_args_err {
 
@@ -13,10 +13,10 @@ function duplicate_args_err {
 	echo "Can't specify arguments twice.";
 }
 # check to see if the number of arguments is valid
-if [ "$#" -lt 1 ]; then
+if [[ "$#" -lt 1 ]]; then
 	echo "Not enough arguments.";
 	exit 1;
-elif [ "$#" -gt 4 ]; then
+elif [[ "$#" -gt 4 ]]; then
 	echo "Too many arguments.";
 	exit 1;
 fi
@@ -25,25 +25,25 @@ fi
 for (( i=1; i <= $# ; ++i )); do
 	case "${!i}" in
 	"-i")
-		if [ CHECK_NIC = true ]; then
+		if $CHECK_NIC; then
 			duplicate_args_err ${!i};
 		fi
 		CHECK_NIC=true;
 		;;
 	"-n")
-		if [ CHECK_NETWORK = true ]; then
+		if $CHECK_NETWORK; then
 			duplicate_args_err ${!i};
 		fi
 		CHECK_NETWORK=true;
 		;;
 	"-d")
-		if [ CHECK_DISK_USAGE = true ]; then
+		if $CHECK_DISK_USAGE; then
 			duplicate_args_err ${!i};
 		fi
 		CHECK_DISK_USAGE=true;
 		;;
 	"-l")
-		if [ CHECK_LSERVICES = true ]; then
+		if $CHECK_LSERVICES; then
 			duplicate_args_err ${!i};
 		fi
 		CHECK_LSERVICES=true;
@@ -58,47 +58,36 @@ done
 
 # output state information
 echo;
-[[ $CHECK_NIC = true ]] && status_message="ON" ||  status_message="OFF";
+$CHECK_NIC && status_message="ON" ||  status_message="OFF";
 echo "check_nic_health => $status_message";
-[[ $CHECK_DISK_USAGE = true ]] && status_message="ON" || status_message="OFF";
+$CHECK_DISK_USAGE && status_message="ON" || status_message="OFF";
 echo "check_disk_usage => $status_message";
-[[ $CHECK_LSERVICES = true ]] && status_message="ON" || status_message="OFF";
+$CHECK_LSERVICES && status_message="ON" || status_message="OFF";
 echo "check_lservices => $status_message";
-[[ $CHECK_NETWORK = true ]] && status_message="ON" || status_message="OFF";
+$CHECK_NETWORK && status_message="ON" || status_message="OFF";
 echo "check_NETWORK => $status_message";
 echo;
 
 # display listening services
-if [ $CHECK_LSERVICES = true ]; then
-	
-	echo "PRINTING LISTENING SERVICES";
-	echo;
+if $CHECK_LSERVICES; then
+	printf "PRINTING LISTENING SERVICES\n\n";
 
-	result=`lsof -i | grep LISTEN`;
-	if [ -n "$result" ]; then
-		echo "$result";
-		echo;
+	result=$(lsof -i | grep -F LISTEN);
+	if [[ -n "$result" ]]; then
+		printf "%s\n\n" "$result"
 	else
-		echo "This machine does not appear to be running any services.";
-		echo;
+		printf "This machine does not appear to be running any services.\n\n"
 	fi
 fi
-if [ $CHECK_NIC = true ]; then
-	devices=`ip link show | awk 'NR%2==1' | awk '{ print $2 }' | sed 's/://'`;
+if $CHECK_NIC; then
+	devices=$(ip link show | awk 'NR%2==1 { print $2 }' | tr -d :);
 	for d in $devices; do
-		result=`ethtool "$d"`;
-		echo "PRINTING INFORMATION FOR DEVICE: $d";
-		echo;
-		echo "    $result";
-		echo;
-		
+		result=$(ethtool "$d");
+		printf "PRINTING INFORMATION FOR DEVICE: %s\n\n" "$d"
+		printf "    %s\n\n" "$result"
 	done
 fi
-if [ $CHECK_NETWORK = true ]; then
-	echo "PRINTING NETWORK INFORMATION";
-	echo;
-
-	result=`ifconfig`;
-	echo "    $result";
-	echo;
+if $CHECK_NETWORK; then
+	printf "PRINTING NETWORK INFORMATION\n\n"
+	ifconfig | xargs -0 printf "    %s\n\n"
 fi
